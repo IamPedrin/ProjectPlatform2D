@@ -191,22 +191,81 @@ public class Player : MonoBehaviour
                 isFastFalling = true;
             }
 
-            
+            if (VerticalVelocity >= 0f)
+            {
+                apexPoint = Mathf.InverseLerp(InitialJumpVelocity, 0f, VerticalVelocity);
+
+                if (apexPoint > ApexThreshold)
+                {
+                    if (!isPastApexThreshold)
+                    {
+                        isPastApexThreshold = true;
+                        timePastApexThreshold = 0f;
+                    }
+
+                    if (isPastApexThreshold)
+                    {
+                        timePastApexThreshold += Time.fixedDeltaTime;
+                        if (timePastApexThreshold < ApexeHangTime)
+                        {
+                            VerticalVelocity = 0f;
+                        }
+                        else
+                        {
+                            VerticalVelocity = -0.01f;
+                        }
+                    }
+                }
+                else
+                {
+                    VerticalVelocity += Gravity * Time.fixedDeltaTime;
+                    if (isPastApexThreshold)
+                    {
+                        isPastApexThreshold = false;
+                    }
+                }
+
+            }
+            else if (!isFastFalling)
+            {
+                VerticalVelocity += Gravity * gravityOnReleaseMultiplier * Time.fixedDeltaTime;
+            }
+
+            else if (VerticalVelocity < 0f)
+            {
+                if (!isFalling)
+                {
+                    isFalling = true;
+                }
+            }
+        }
+        //jump cut
+        if (isFastFalling)
+        {
+            if (fastFallTime >= timeToCancelFullJump)
+            {
+                VerticalVelocity += Gravity * gravityOnReleaseMultiplier * Time.fixedDeltaTime;
+            }
+            else if (fastFallTime < timeToCancelFullJump)
+            {
+                VerticalVelocity = Mathf.Lerp(fastFallReleaseSpeed, 0f, fastFallTime / timeToCancelFullJump);
+            }
+
+            fastFallTime += Time.fixedDeltaTime;
+        }
+        //gravidade normal enquanto falling
+        if(!isGrounded && !isJumping)
+        {
+            if(!isFalling)
+            {
+                isFalling = true;
+            }
+            VerticalVelocity += Gravity * Time.fixedDeltaTime;
         }
 
-        //check bater a cabeça
-
-        //controle do apex
-
-        //gravidade enquanto subindo
-
-        //gravidade descendo
-
-        //jump cut
-
-        //gravidade normal enquanto falling
-
         //limitar fall speed
+        VerticalVelocity = Mathf.Clamp(VerticalVelocity, -MaxWalkSpeed, 50f);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, VerticalVelocity);
     }
 
     private void JumpChecks()
@@ -259,7 +318,7 @@ public class Player : MonoBehaviour
             InitiateJump(1);
         }
         //air jump depois do coyote timer
-        else if (jumpBufferTimer > 0f && isFalling && numberUsedJumps < maxJumps)
+        else if (jumpBufferTimer > 0f && isFalling && numberUsedJumps < maxJumps - 1)
         {
             InitiateJump(2);
             isFastFalling = false;
@@ -278,7 +337,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void InitiateJump(int numberUsedJumps)
+    private void InitiateJump(int UsedJumps)
     {
         if (!isJumping)
         {
@@ -286,7 +345,7 @@ public class Player : MonoBehaviour
         }
 
         jumpBufferTimer = 0f;
-        numberUsedJumps += numberUsedJumps;
+        numberUsedJumps += UsedJumps;
         VerticalVelocity = InitialJumpVelocity;
     }
 
