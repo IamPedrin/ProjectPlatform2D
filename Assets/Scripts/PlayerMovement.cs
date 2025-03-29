@@ -8,10 +8,8 @@ public class PlayerMovement : MonoBehaviour
     //Components
     private Rigidbody2D rb;
 
-    private InputAction jumpWasPressed;
-    //
     [Header("Movement")]
-    private float moveInput; //Recebe o input do jogador se movimentando
+    private Vector2 moveInput; //Recebe o input do jogador se movimentando
     public float moveSpeed = 5f; //Velocidade maxima que o jogador pode alcançar
     public float acceleration;
     public float decceleration;
@@ -40,11 +38,13 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundLayer;
     bool isGrounded;
 
-    //Variaveis de controle
+    //Variaveis de controle e tempo
     public bool IsFacingRight { get; private set; }
     public float LastOnGroundTime { get; private set; }
     public float LastJumpTime { get; private set; }
     public float LastPressedJumpTime { get; private set; }
+    public float CoyoteTimer { get; private set; }
+    public float JumpBufferTimer { get; private set; }
 
 
     void Start()
@@ -55,13 +55,11 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        LastOnGroundTime -= Time.deltaTime;
-        LastJumpTime -= Time.deltaTime;
+        CheckTimers();
         Gravity();
-        GroundCheck();
         Friction();
         FlipSprite();
-
+        GroundCheck();
     }
     private void FixedUpdate()
     {
@@ -71,14 +69,14 @@ public class PlayerMovement : MonoBehaviour
     //Função para movimentação horizontal do jogador utilizando o novo InputSystem
     public void Move(InputAction.CallbackContext context)
     {
-        moveInput = context.ReadValue<Vector2>().x;
+        moveInput = context.ReadValue<Vector2>();
     }
 
     //Melhorando a movimentação
     private void Movement()
     {
         //Calcula a direcao e valocidade maxima que queremos
-        float targetSpeed = moveInput * moveSpeed;
+        float targetSpeed = moveInput.x * moveSpeed;
         //Calcula a diferença da velocidade atual e a velocidade esperada
         float speedDiff = targetSpeed - rb.linearVelocity.x;
         //Modifica o ritmo da aceleraçao dependendo da situação
@@ -90,12 +88,16 @@ public class PlayerMovement : MonoBehaviour
         rb.AddForce(movement * Vector2.right);
     }
 
+    //Função para implementar um mecanismo de atrito e desacelerar o jogador enquanto estiver no chao
     private void Friction()
     {
-        if (LastOnGroundTime > 0 && Mathf.Abs(moveInput) < 0.01f)
+        if (LastOnGroundTime > 0 && Mathf.Abs(moveInput.x) < 0.01f)
         {
+            //Quantidade de força de atrito será aplicado no jgogador
             float amount = Mathf.Min(Mathf.Abs(rb.linearVelocity.x), Mathf.Abs(frictionAmount));
+            //Ajusta o sinal para ser oposto a direção do movimento
             amount *= Mathf.Sign(rb.linearVelocity.x);
+            //Aplica força ao rigidBody e cria um vetor na direção oposta ao que está o movimento
             rb.AddForce(Vector2.right * -amount, ForceMode2D.Impulse);
         }
     }
@@ -105,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
     {
         //Verifica se esta olhando para a direita e tem um movimento para a esquerda
         //Ou se não está olhando e tem um movimento para a direita
-        if (IsFacingRight && moveInput < 0 || !IsFacingRight && moveInput > 0)
+        if (IsFacingRight && moveInput.x < 0 || !IsFacingRight && moveInput.x > 0)
         {
             IsFacingRight = !IsFacingRight;
             Vector3 ls = transform.localScale; //Pega o localscale do player
@@ -114,43 +116,36 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    //Função para aplicar o pulo ao jogador
     public void Jump(InputAction.CallbackContext context)
     {
-        
-        if (jumpsRemaining > 0 && LastOnGroundTime > 0)
+        if (jumpsRemaining > 0)
         {
+
             if (context.performed)
             {
-                OnJump();
-                LastJumpTime = jumpInputBufferTimer;
+                JumpBufferTimer = jumpInputBufferTimer;
+                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+                isJumping = true;
+                jumpsRemaining--;
+                LastOnGroundTime = 0;
+                LastJumpTime = 0;
 
             }
             else if (context.canceled)
             {
-                OnJumpCut();
-                LastJumpTime = jumpInputBufferTimer;
+                JumpBufferTimer = jumpInputBufferTimer;
+                rb.AddForce(Vector2.down * rb.linearVelocity.y * (1 - jumpCutMultiplier), ForceMode2D.Impulse);
+                isJumping = true;
+                jumpsRemaining--;
+                LastJumpTime = 0;
+                LastOnGroundTime = 0;
             }
         }
     }
 
-    private void OnJump()
-    {
-        rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-        isJumping = true;
-        jumpsRemaining--;
-        LastOnGroundTime = 0;
-        LastJumpTime = 0;
-    }
-
-    private void OnJumpCut()
-    {
-        rb.AddForce(Vector2.down * rb.linearVelocity.y * (1 - jumpCutMultiplier), ForceMode2D.Impulse);
-        isJumping = true;
-        jumpsRemaining--;
-        LastJumpTime = 0;
-        LastOnGroundTime = 0;
-    }
-
+    #region Checkers 
+    //Verifica se o jogador esta em colisão com o chão
     private void GroundCheck()
     {
         if (Physics2D.OverlapBox(groundCheckPos.position, groundCheckSize, 0, groundLayer))
@@ -166,6 +161,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    //Função para aumentar a gravidade enquanto o jogador está caindo
     private void Gravity()
     {
         if (rb.linearVelocity.y < 0)
@@ -186,4 +182,21 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawCube(groundCheckPos.position, groundCheckSize);
     }
 
+    private void CheckTimers()
+    {
+        LastOnGroundTime -= Time.deltaTime;
+        LastJumpTime -= Time.deltaTime;
+        JumpBufferTimer -= Time.deltaTime;
+
+        if (!isGrounded)
+        {
+            CoyoteTimer -= Time.deltaTime;
+        }
+        else
+        {
+            CoyoteTimer = coyoteTime;
+        }
+    }
+
+    #endregion
 }

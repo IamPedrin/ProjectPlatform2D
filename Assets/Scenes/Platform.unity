@@ -265,7 +265,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 582949880}
-  - component: {fileID: 582949885}
+  - component: {fileID: 582949886}
   - component: {fileID: 582949884}
   - component: {fileID: 582949878}
   - component: {fileID: 582949883}
@@ -289,10 +289,10 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 6
+  m_Mass: 1
   m_LinearDamping: 0
-  m_AngularDamping: 0
-  m_GravityScale: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1.1
   m_Material: {fileID: 6200000, guid: cd180c19d3e35b042a433e1f519811a5, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
@@ -301,7 +301,7 @@ Rigidbody2D:
     serializedVersion: 2
     m_Bits: 0
   m_Interpolate: 1
-  m_SleepingMode: 1
+  m_SleepingMode: 0
   m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!4 &582949880
@@ -334,7 +334,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 2
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -348,7 +348,7 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 582949886}
         m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
         m_MethodName: Move
         m_Mode: 0
@@ -380,7 +380,7 @@ MonoBehaviour:
     m_ActionName: 'Player/Crouch[/Keyboard/c]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 582949886}
         m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
         m_MethodName: Jump
         m_Mode: 0
@@ -552,7 +552,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &582949885
+--- !u!114 &582949886
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -561,33 +561,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 582949876}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbc354e79e14b5c43bec5aaa06efbf32, type: 3}
+  m_Script: {fileID: 11500000, guid: 31f84c60ec5f3e2409f9ca9a85523430, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxWalkSpeed: 10
-  groundAcceleration: 5
-  groundDecceleration: 20
-  airAcceleration: 5
-  airDecceleration: 5
-  maxRunSpeed: 20
+  moveSpeed: 9
+  acceleration: 13
+  decceleration: 16
+  velPower: 0.96
+  frictionAmount: 0.05
+  jumpForce: 16
+  maxJumps: 1
+  jumpCutMultiplier: 0.4
+  coyoteTime: 0.3
+  jumpInputBufferTimer: 3
+  baseGravity: 4
+  fallGravityMultiplier: 3
+  maxFallSpeed: 20
   groundCheckPos: {fileID: 1649449794}
-  groundCheckSize: {x: 0.74, y: 0.05}
+  groundCheckSize: {x: 0.92, y: 0.05}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  headCheckPos: {fileID: 885439995}
-  headCheckSize: {x: 0.75, y: 0.05}
-  jumpHeight: 6.5
-  maxJumps: 2
-  jumpHeightCompensationFactor: 1.05
-  timeTillJumpApex: 0.35
-  gravityOnReleaseMultiplier: 2
-  maxFallSpeed: 26
-  timeToCancelFullJump: 0.027
-  ApexThreshold: 0.97
-  ApexeHangTime: 0.075
-  jumpBufferTime: 0.125
-  jumpCoyoteTime: 0.1
 --- !u!1 &885439994
 GameObject:
   m_ObjectHideFlags: 0
@@ -806,7 +800,7 @@ Transform:
   m_GameObject: {fileID: 1746121982}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.52, y: -2.19, z: 0}
+  m_LocalPosition: {x: 1.52, y: -2.48, z: 0}
   m_LocalScale: {x: 5.9900727, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -968,8 +962,8 @@ Transform:
   m_GameObject: {fileID: 1987896618}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -5, z: 0}
-  m_LocalScale: {x: 20.000244, y: 1, z: 1}
+  m_LocalPosition: {x: 2.2849, y: -5, z: 0}
+  m_LocalScale: {x: 31.182476, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
