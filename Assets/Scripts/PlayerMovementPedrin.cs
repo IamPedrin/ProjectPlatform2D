@@ -23,10 +23,12 @@ public class PlayerMovementPedrin : MonoBehaviour
 
     [Header("Jump")]
     public float jumpForce = 10f;
+    public int maxJumps = 2;
     [Range(0, 0.9f)] public float jumpCutMultiplier;
     public float coyoteTime = 0.2f;
     public float jumpBufferTimer = 0.2f;
-    private bool doubleJump;
+    private int remainingJumps;
+
     bool isJumping = false;
 
     [Header("Gravity")]
@@ -125,12 +127,13 @@ public class PlayerMovementPedrin : MonoBehaviour
 
     private void InitiateJump()
     {
-        if (JumpBufferCounter > 0 && (isGrounded || CoyoteTimer > 0f))
+        if (JumpBufferCounter > 0 && ((isGrounded || CoyoteTimer > 0f) || (isJumping && remainingJumps > 0)))
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             JumpBufferCounter = 0f;
             CoyoteTimer = 0f;
             isJumping = true;
+            remainingJumps--;
         }
     }
 
@@ -165,16 +168,13 @@ public class PlayerMovementPedrin : MonoBehaviour
         {
             isGrounded = true;
             isJumping = false;
+            remainingJumps = maxJumps;
         }
         else
         {
             isGrounded = false;
         }
 
-        if (isGrounded && !jumpReference.action.WasPressedThisFrame())
-        {
-            doubleJump = false;
-        }
     }
 
     private void TimersCheck()
