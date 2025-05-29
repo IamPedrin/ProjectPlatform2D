@@ -209,9 +209,11 @@ public class PlayerMovementPedrin : MonoBehaviour
         if (IsFacingRight && moveInput.x < 0 || !IsFacingRight && moveInput.x > 0)
         {
             IsFacingRight = !IsFacingRight;
-            Vector3 ls = transform.localScale; //Pega o localscale do player
-            ls.x *= -1; //Multiplica por -1 para inverter o sprite no eixo x
-            transform.localScale = ls; //O localscale do player recebe o novo localScale ja 
+            // Vector3 ls = transform.localScale; //Pega o localscale do player
+            // ls.x *= -1; //Multiplica por -1 para inverter o sprite no eixo x
+            // transform.localScale = ls; //O localscale do player recebe o novo localScale ja 
+
+            transform.Rotate(0f, 180, 0f);
         }
     }
 
